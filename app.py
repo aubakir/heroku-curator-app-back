@@ -25,7 +25,7 @@ def hello():
 
 
 
-@app.route('/jira', methods=['POST'])
+@app.route('/jira/create/task', methods=['POST'])
 def jira():
     data = request.get_json()
     print(data)
