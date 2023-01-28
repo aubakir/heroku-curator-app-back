@@ -2,7 +2,7 @@ from flask import Flask, jsonify, request, json
 from flask_cors import CORS
 import os
 from flask import send_from_directory
-
+import DBconnect
 
 # instantiate the app
 app = Flask(__name__)
@@ -23,6 +23,23 @@ def hello():
 	    "Hackathon": "v0.1"
 	}
 
+
+
+@app.route('/jira', methods=['POST'])
+def jira():
+    data = request.get_json()
+    print(data)
+    
+    return jsonify({'answer': 'success'})
+
+
+@app.route('/authorization', methods=['POST'])
+def authorization():
+    data = request.get_json()
+    username = data['username']
+    password = data['password']
+    
+    return jsonify({'answer': DBconnect.checkUser(username,password)})
 
 
 if __name__ == "__main__":
