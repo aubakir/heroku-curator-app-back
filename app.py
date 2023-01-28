@@ -15,7 +15,7 @@ CORS(app, resources={r'/*': {'origins': '*'}})
 @app.route('/favicon.ico')
 def favicon():
     return send_from_directory(os.path.join(app.root_path, 'static'),
-                               'favicon.ico', mimetype='image/favicon.png')
+                               'favicon.ico', mimetype='favicon.png')
 
 @app.route('/')
 def hello():
