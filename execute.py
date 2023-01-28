@@ -25,13 +25,3 @@
 #     new_task = np.array([[2, 3, 0.9]])
 #     predicted_difficulty = model.predict(new_task)
 #     print("Predicted difficulty of the new task:", predicted_difficulty[0])
-
-
-
-def validJson(json):
-    json = json.replace('\'','\"')
-    json = json.replace(': None',': \"None\"')
-    json = json.replace(': True',': \"True\"')
-    json = json.replace(': False',': \"False\"')
-
-    return json
