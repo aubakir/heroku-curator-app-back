@@ -25,7 +25,7 @@ def hello():
 	}
 
 
-
+#Принмает данные о новым созданной задачи
 @app.route('/jira/create/task', methods=['POST'])
 def createTask():
 
@@ -54,6 +54,7 @@ def updateSprint():
     return jsonify(data)
 
 
+#Front authorization
 @app.route('/authorization', methods=['POST'])
 def authorization():
     data = request.get_json()
@@ -61,6 +62,15 @@ def authorization():
     password = data['password']
     
     return jsonify({'answer': DBconnect.checkUser(username,password)})
+
+
+import execute
+
+#Check rating
+@app.route('/rating', methods=['POST'])
+def rating():
+    return jsonify(execute.sumRating())
+    
 
 
 if __name__ == "__main__":
