@@ -29,8 +29,24 @@ def hello():
 def jira():
     data = request.get_json()
     print(data)
-    
-    
+
+    return jsonify(data)
+
+
+
+@app.route('/jira/create/task', methods=['POST'])
+def createTask():
+    data = request.get_json()
+    print(data)
+
+    return jsonify(data)
+
+
+@app.route('/jira/update/sprint', methods=['POST'])
+def updateSprint():
+    data = request.get_json()
+    print(data)
+
     return jsonify(data)
 
 

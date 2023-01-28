@@ -1,6 +1,11 @@
 import psycopg2
 
 
+
+jira_username = 'admiral.adam23@gmail.com'
+jira_password = 'xQV5E1ru9GB9v0ULFNQs8E4D'
+jira_url = 'https://hackathon2023bcc.atlassian.net'
+
 def connection():
     conn = psycopg2.connect(database="pvaqhini",
                             host="kandula.db.elephantsql.com",
