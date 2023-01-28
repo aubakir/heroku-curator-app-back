@@ -28,9 +28,9 @@ def hello():
 @app.route('/jira', methods=['POST'])
 def jira():
     data = request.get_json()
-    print(data)
     
-    return jsonify({'answer': 'success'})
+    
+    return jsonify(data)
 
 
 @app.route('/authorization', methods=['POST'])
