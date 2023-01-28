@@ -59,6 +59,7 @@ def sumRating():
     
     #средний сложность задачи
     level = 0
+    level_fact = 0
 
     #Общая время которая предполагалась 
     obj_date = ''
@@ -82,6 +83,7 @@ def sumRating():
             end_date = date[1]
             real_end_date = date[2]
             level = level + date[3] - 1
+            level_fact = level_fact + date[3]
             
             #Предпологаема время
             date_customer = start_date - end_date
@@ -119,7 +121,7 @@ def sumRating():
             
             json['all_date_customer'] = str(obj_date)
             json['get_date_developer'] = str(get_date)
-            json['task_difficulty'] = str(level/(len(allDate)))
+            json['task_difficulty'] = str(level_fact/(len(allDate)))
             json['user_rating'] = str((level/(len(allDate)))*(per/100))
 
             print('общию дату которая предпологалась',str(obj_date))
