@@ -3,6 +3,7 @@ from flask_cors import CORS
 import os
 from flask import send_from_directory
 import DBconnect
+import execute
 
 # instantiate the app
 app = Flask(__name__)
@@ -36,7 +37,10 @@ def jira():
 
 @app.route('/jira/create/task', methods=['POST'])
 def createTask():
-    data = request.get_json()
+
+    data = json.loads(execute.validJson(str(request.get_json())))
+    
+    
     print(data)
 
     return jsonify(data)
