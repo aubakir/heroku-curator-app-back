@@ -1,8 +1,16 @@
-import flask
+from flask import Flask, jsonify, request, json
+from flask_cors import CORS
 import os
 from flask import send_from_directory
 
-app = flask.Flask(__name__)
+
+# instantiate the app
+app = Flask(__name__)
+app.config.from_object(__name__)
+
+# enable CORS
+CORS(app, resources={r'/*': {'origins': '*'}})
+
 
 @app.route('/favicon.ico')
 def favicon():
@@ -10,9 +18,12 @@ def favicon():
                                'favicon.ico', mimetype='image/favicon.png')
 
 @app.route('/')
-@app.route('/home')
-def home():
-    return "Hackathon"
+def hello():
+	return {
+	    "Hackathon": "v0.1"
+	}
+
+
 
 if __name__ == "__main__":
     app.secret_key = 'ItIsASecret'
