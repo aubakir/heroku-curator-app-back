@@ -17,7 +17,7 @@ def favicon():
     return send_from_directory(os.path.join(app.root_path, 'static'),
                                'favicon.ico', mimetype='favicon.png')
 
-@app.route('/')
+@app.route('/', methods=['GET'])
 def hello():
 	return {
 	    "Hackathon": "v0.1"
