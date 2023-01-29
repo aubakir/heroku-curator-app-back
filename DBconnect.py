@@ -3,7 +3,7 @@ import psycopg2
 
 #Jira credential
 jira_username = 'admiral.adam23@gmail.com'
-jira_password = '9W1ru0WjmdY5t63do1ZdFC90'
+jira_password = '8nxuPbUDYBDqKZoQVb8m4417'
 jira_url = 'https://hackathon2023bcc.atlassian.net'
 
 
