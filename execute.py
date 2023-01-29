@@ -58,32 +58,35 @@ def sumRating():
     get_date = ''
     
     #средний сложность задачи
-    level = 0
-    level_fact = 0
+    
 
     #Общая время которая предполагалась 
-    obj_date = ''
+    
     
 
     for user in username:
 
-        json = json_ex
+        obj_date = ''
+        level = 0
+        level_fact = 0
+
+        json = {'username':'','fio':'','role':'','all_date_customer':'','get_date_developer':'','task_difficulty':'','user_rating':''}
 
         json['username'] = user[0]
         json['fio'] = user[1]
         json['role'] = user[2]
 
 
-
-        cursor.execute(f"select start_date,end_date,real_end_date,level from task_work where user_name='{user[0]}' and status=3 and start_date >= '2022-10-01 00:00:00' and end_date <= '2023-01-01 00:00:00'")
+        #start_date,end_date,real_end_date,level
+        cursor.execute(f"select * from task_work where user_name='{user[0]}' and status=3 and start_date >= '2022-10-01 00:00:00' and end_date <= '2023-01-01 00:00:00'")
         allDate = cursor.fetchall()
 
         for date in allDate:
-            start_date = date[0]
-            end_date = date[1]
-            real_end_date = date[2]
-            level = level + date[3] - 1
-            level_fact = level_fact + date[3]
+            start_date = date[6]
+            end_date = date[7]
+            real_end_date = date[8]
+            level = level + date[9] + 1
+            level_fact = level_fact + date[9]
             
             #Предпологаема время
             date_customer = start_date - end_date
@@ -116,6 +119,7 @@ def sumRating():
                     get_date = get_date + date_plus
 
         if(level):
+            #per = ('СРЕДНЯЯ СЛОЖНОСТЬ ЗАДАЧИ ЗА КВАРТАЛ'/'ДНИ КОТОРЫЕ БЫЛИ ВЫДАНЫ В ОБЩЕМ') * (100 + ('ДНИ КОТОРЫЙ БЫЛО СЭКОНОМЛЕНО'/100)/'ДНИ КОТОРЫЕ БЫЛИ ВЫДАНЫ В ОБЩЕМ')
             
             per = 100 + (int(str(get_date).split(' ')[0])*100)/(int(str(obj_date).split(' ')[0])*-1)
             
