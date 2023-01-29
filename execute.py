@@ -120,18 +120,22 @@ def sumRating():
 
         if(level):
             #per = ('СРЕДНЯЯ СЛОЖНОСТЬ ЗАДАЧИ ЗА КВАРТАЛ'/'ДНИ КОТОРЫЕ БЫЛИ ВЫДАНЫ В ОБЩЕМ') * (100 + ('ДНИ КОТОРЫЙ БЫЛО СЭКОНОМЛЕНО'/100)/'ДНИ КОТОРЫЕ БЫЛИ ВЫДАНЫ В ОБЩЕМ')
-            
-            per = 100 + (int(str(get_date).split(' ')[0])*100)/(int(str(obj_date).split(' ')[0])*-1)
+            print(str(get_date))
+            print(str(obj_date))
+            if(str(get_date)=='0:00:00'):
+                per = 100 + (1*100)/(int(str(obj_date).split(' ')[0])*-1)
+            else:
+                per = 100 + (int(str(get_date).split(' ')[0])*100)/(int(str(obj_date).split(' ')[0])*-1)
             
             json['all_date_customer'] = str(obj_date)
             json['get_date_developer'] = str(get_date)
             json['task_difficulty'] = str(level_fact/(len(allDate)))
             json['user_rating'] = str((level/(len(allDate)))*(per/100))
 
-            print('общию дату которая предпологалась',str(obj_date))
-            print('сколько сэкономил',str(get_date))
-            print('средний сложность задачи',str(level/(len(allDate))))
-            print('Рейтинг за этот квартал',(level/(len(allDate)))*(per/100))
+            # print('общию дату которая предпологалась',str(obj_date))
+            # print('сколько сэкономил',str(get_date))
+            # print('средний сложность задачи',str(level/(len(allDate))))
+            # print('Рейтинг за этот квартал',(level/(len(allDate)))*(per/100))
     
             data.append(json)
     
