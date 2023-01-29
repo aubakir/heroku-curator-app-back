@@ -180,7 +180,7 @@ def updateTaskDevelop(data):
     if(user_date<end_date):
         #Отправка комментарий
         user_end_date = user_date + timedelta(days=int(task_day))
-        result = addComment(f'Разработчик свободен и может взять задачу с {str(user_date)} по {str(user_end_date)}',task_name)
+        result = addComment(f'Разработчик({task_user}) свободен и может взять задачу с {str(user_date)} по {str(user_end_date)}',task_name)
         print(result)
     else:
         user_end_date = user_date + timedelta(days=int(task_day))
