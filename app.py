@@ -51,12 +51,22 @@ def createTask():
 @app.route('/jira/update/task', methods=['POST'])
 def updateTask():
 
-    print('-------------------------------UPDATE TASK----------------------------------------')
-    print(request.get_json())
-    print('-------------------------------END UPDATE TASK----------------------------------------')
-    
-    
-    return request.get_json()
+    if(request.get_json()):
+        data = str(request.get_json())
+        data = data.replace('\'','\"')
+        data = data.replace(': None',': \"None\"')
+        data = data.replace(': True',': \"True\"')
+        data = data.replace(': False',': \"False\"')
+
+        
+        print('-------------------------------UPDATE TASK----------------------------------------')
+        print(data)
+        print('-------------------------------END UPDATE TASK----------------------------------------')
+
+        return jsonify({'answer':'success'})
+
+    return jsonify({'answer':'failed'})
+
 
 
 @app.route('/jira/update/sprint', methods=['POST'])
