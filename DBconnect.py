@@ -94,7 +94,9 @@ def insertNewTask(data):
     cursor.execute(f"""select * from task_work where name='{task_name}'""")
     data = cursor.fetchone()
 
-    if(len(data)==0):
+    if(data):
+        print('Создания уже создано')
+    else:
         cursor.execute(f"""insert into task_work (
                             id_jira, 
                             name, 
