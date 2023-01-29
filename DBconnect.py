@@ -179,13 +179,14 @@ def updateTaskDevelop(data):
     #Проверка пользователь занять или нет
     if(user_date<end_date):
         #Отправка комментарий
-        result = addComment(f'Пользователь свободен и может взять задачу: {str(user_date)}',task_name)
+        user_end_date = user_date + timedelta(days=int(task_day))
+        result = addComment(f'Разработчик свободен и может взять задачу с {str(user_date)} по {str(user_end_date)}',task_name)
         print(result)
     else:
         user_end_date = user_date + timedelta(days=int(task_day))
         #Отправка комментарий
-        print(f'Пользователь на данный момент занят. Задача может быть взято с {str(user_date)} по {str(user_end_date)}',task_name)
-        result = addComment(f'Пользователь на данный момент занят. Задача может быть взято с {str(user_date)} по {str(user_end_date)}',task_name)
+        print(f'Разработчик на данный момент занят. Задача может быть взято с {str(user_date)} по {str(user_end_date)}',task_name)
+        result = addComment(f'Разработчик на данный момент занят. Задача может быть взято с {str(user_date)} по {str(user_end_date)}',task_name)
         print(result)
 
         #Поиск других разработчиков
