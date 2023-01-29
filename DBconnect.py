@@ -70,7 +70,7 @@ def getMax(data):
 
 import json
 from datetime import datetime, timedelta
-import pandas as pd
+
 
 
 #Добавления исполнителя
