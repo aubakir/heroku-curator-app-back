@@ -91,30 +91,30 @@ def insertNewTask(data):
     #2 - в ожида
     
     conn,cursor = connection()
-    cursor.execute(f"""insert into task_work (
-                        id_jira, 
-                        name, 
-                        user_name, 
-                        author, 
-                        start_date,
-                        end_date, 
-                        status) values(
-                             {id_jira},
-                            '{task_name}',
-                            '{task_user}',
-                            '{task_author}',
-                            '{start_date}',
-                            '{end_date}',
-                            1);""")
-    conn.commit()
+    cursor.execute(f"""select * from task_work where name='{task_name}'""")
+    data = cursor.fetchone()
+
+    if(len(data)==0):
+        cursor.execute(f"""insert into task_work (
+                            id_jira, 
+                            name, 
+                            user_name, 
+                            author, 
+                            start_date,
+                            end_date, 
+                            status) values(
+                                {id_jira},
+                                '{task_name}',
+                                '{task_user}',
+                                '{task_author}',
+                                '{start_date}',
+                                '{end_date}',
+                                1);""")
+        conn.commit()
 
     #Вытаскиваем когда разработчик может освободиться
-    cursor.execute(f"""select u1.username,u1.fio, count(u1.username) from users u1, skills_user su1, skills_prog sp1
-                where su1.tab_number = u1.user_id and su1.prog_id=sp1.id and su1.prog_id in (
-                select su.prog_id from users u,skills_user su,skills_prog sp 
-                where u.username='{task_user}' and u.user_id=su.tab_number and su.prog_id=sp.id and u.role='Разработчик') 
-                and u1.role='Разработчик' and u1.username!='{task_user}' GROUP BY user_id;""")
-    data = cursor.fetchall()
+    cursor.execute(f"""SELECT END_DATE FROM task_work WHERE user_name='{task_user}' AND END_DATE in (SELECT MAX(END_DATE) FROM task_work  WHERE user_name='{task_user}' AND STATUS=2)""")
+    data = cursor.fetchone()
     
     user_date = str(data[0]).split(' ')[0]
     user_date = datetime.strptime(user_date, '%Y-%m-%d').date()
@@ -123,7 +123,8 @@ def insertNewTask(data):
     #Проверка пользователь занять или нет
     if(user_date<end_date):
         #Отправка комментарий
-        end_date = start_date + timedelta(days=3)
+        end_date = datetime.today() + timedelta(days=3)
+        print(f'Аналитик свободен, время выполнений работы с {str(start_date)} по {str(end_date)}',task_name)
         result = addComment(f'Аналитик свободен, время выполнений работы с {str(start_date)} по {str(end_date)}',task_name)
         print(result)
     else:
@@ -223,14 +224,36 @@ def updateTaskDevelop(data):
     return {'answer':'success'}
             
         
-   
+
+def nagruzka():
+
+    conn,cursor = connection()
+    cursor.execute(f"""select user_name,start_date,end_date from task_work where user_name='Baglanbek' and status=2""")
+    data = cursor.fetchall()
+
+    all_date = ''
+
+    for line in data:
+        username = line[0]
+        start_date = line[1]
+        end_date = line[2]
+
+        if(all_date==''):
+            all_date=int(str(start_date-end_date).split(' ')[0])
+            
+        else:
+            all_date=all_date+int(str(start_date-end_date).split(' ')[0])
+
+    print(all_date)
+
+
     
 
+#
 
 
-
-# #CREATE
-# data = '''{"self": "https://hackathon2023bcc.atlassian.net/rest/api/2/10014", "id": 10014, "key": "HAC-13", "changelog": {"startAt": 0, "maxResults": 0, "total": 0, "histories": "None"}, "fields": {"statuscategorychangedate": "2023-01-29T10:37:39.918+0600", "issuetype": {"self": "https://hackathon2023bcc.atlassian.net/rest/api/2/issuetype/10005", "id": 10005, "description": "Stories track functionality or features expressed as user goals.", "iconUrl": "https://hackathon2023bcc.atlassian.net/rest/api/2/universal_avatar/view/type/issuetype/avatar/10315?size=medium", "name": "Story", "untranslatedName": "None", "subtask": "False", "fields": {}, "statuses": [], "namedValue": "Story"}, "timespent": "None", "customfield_10030": "None", "customfield_10031": "None", "project": {"self": "https://hackathon2023bcc.atlassian.net/rest/api/2/project/10002", "id": 10002, "key": "HAC", "name": "Hackathon", "description": "None", "avatarUrls": {"48x48": "https://hackathon2023bcc.atlassian.net/rest/api/2/universal_avatar/view/type/project/avatar/10413", "24x24": "https://hackathon2023bcc.atlassian.net/rest/api/2/universal_avatar/view/type/project/avatar/10413?size=small", "16x16": "https://hackathon2023bcc.atlassian.net/rest/api/2/universal_avatar/view/type/project/avatar/10413?size=xsmall", "32x32": "https://hackathon2023bcc.atlassian.net/rest/api/2/universal_avatar/view/type/project/avatar/10413?size=medium"}, "issuetypes": "None", "projectCategory": "None", "email": "None", "lead": "None", "components": "None", "versions": "None", "projectTypeKey": "software", "simplified": "True"}, "fixVersions": [], "aggregatetimespent": "None", "resolution": "None", "customfield_10035": "None", "customfield_10036": "None", "customfield_10037": "None", "customfield_10027": "None", "customfield_10028": "None", "customfield_10029": "None", "resolutiondate": "None", "workratio": -1, "lastViewed": "None", "issuerestriction": {"issuerestrictions": {}, "shouldDisplay": "True"}, "watches": {"self": "https://hackathon2023bcc.atlassian.net/rest/api/2/issue/HAC-13/watchers", "watchCount": 1, "isWatching": "False"}, "created": 1674967059597, "customfield_10020": "None", "customfield_10021": "None", "customfield_10022": "None", "customfield_10023": "None", "priority": {"self": "https://hackathon2023bcc.atlassian.net/rest/api/2/priority/3", "id": 3, "name": "Medium", "iconUrl": "https://hackathon2023bcc.atlassian.net/images/icons/priorities/medium.svg", "namedValue": "Medium"}, "customfield_10024": "None", "customfield_10025": "None", "customfield_10026": "None", "labels": [], "customfield_10016": "None", "customfield_10017": "None", "customfield_10018": {"hasEpicLinkFieldDependency": "False", "showField": "False", "nonEditableReason": {"reason": "PLUGIN_LICENSE_ERROR", "message": "Ссылка на родителя доступна только пользователям Jira Premium."}}, "customfield_10019": "0|i00033:", "timeestimate": "None", "aggregatetimeoriginalestimate": "None", "versions": [], "issuelinks": [], "assignee": {"self": "https://hackathon2023bcc.atlassian.net/rest/api/2/user?accountId=63d21c5369c7ae3958d21c1a", "name": "None", "key": "None", "accountId": "63d21c5369c7ae3958d21c1a", "emailAddress": "None", "avatarUrls": {"48x48": "https://secure.gravatar.com/avatar/98e7652b2d663f1851ee2f8e575e5079?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FM-0.png", "24x24": "https://secure.gravatar.com/avatar/98e7652b2d663f1851ee2f8e575e5079?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FM-0.png", "16x16": "https://secure.gravatar.com/avatar/98e7652b2d663f1851ee2f8e575e5079?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FM-0.png", "32x32": "https://secure.gravatar.com/avatar/98e7652b2d663f1851ee2f8e575e5079?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FM-0.png"}, "displayName": "Mayra", "active": "True", "timeZone": "Asia/Almaty", "groups": "None", "locale": "None", "accountType": "atlassian"}, "updated": 1674967059597, "status": {"self": "https://hackathon2023bcc.atlassian.net/rest/api/2/status/10003", "description": "", "iconUrl": "https://hackathon2023bcc.atlassian.net/", "name": "To Do", "untranslatedName": "None", "id": 10003, "statusCategory": {"self": "https://hackathon2023bcc.atlassian.net/rest/api/2/statuscategory/2", "id": 2, "key": "new", "colorName": "blue-gray", "name": "New"}, "untranslatedNameValue": "None"}, "components": [], "timeoriginalestimate": "None", "description": "None", "customfield_10010": "None", "customfield_10014": "None", "timetracking": {"originalEstimate": "None", "remainingEstimate": "None", "timeSpent": "None", "originalEstimateSeconds": 0, "remainingEstimateSeconds": 0, "timeSpentSeconds": 0}, "customfield_10015": "None", "customfield_10005": "None", "customfield_10006": "None", "customfield_10007": "None", "security": "None", "customfield_10008": "None", "attachment": [], "customfield_10009": "None", "aggregatetimeestimate": "None", "summary": "Its a new down", "creator": {"self": "https://hackathon2023bcc.atlassian.net/rest/api/2/user?accountId=63d21dbc8c3018ca8a1c33d3", "name": "None", "key": "None", "accountId": "63d21dbc8c3018ca8a1c33d3", "emailAddress": "None", "avatarUrls": {"48x48": "https://secure.gravatar.com/avatar/3c717695e72499e00abb9942254171be?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FS-3.png", "24x24": "https://secure.gravatar.com/avatar/3c717695e72499e00abb9942254171be?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FS-3.png", "16x16": "https://secure.gravatar.com/avatar/3c717695e72499e00abb9942254171be?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FS-3.png", "32x32": "https://secure.gravatar.com/avatar/3c717695e72499e00abb9942254171be?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FS-3.png"}, "displayName": "Smith", "active": "True", "timeZone": "Asia/Almaty", "groups": "None", "locale": "None", "accountType": "atlassian"}, "subtasks": [], "customfield_10040": "None", "customfield_10041": "None", "customfield_10042": "None", "reporter": {"self": "https://hackathon2023bcc.atlassian.net/rest/api/2/user?accountId=63d21dbc8c3018ca8a1c33d3", "name": "None", "key": "None", "accountId": "63d21dbc8c3018ca8a1c33d3", "emailAddress": "None", "avatarUrls": {"48x48": "https://secure.gravatar.com/avatar/3c717695e72499e00abb9942254171be?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FS-3.png", "24x24": "https://secure.gravatar.com/avatar/3c717695e72499e00abb9942254171be?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FS-3.png", "16x16": "https://secure.gravatar.com/avatar/3c717695e72499e00abb9942254171be?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FS-3.png", "32x32": "https://secure.gravatar.com/avatar/3c717695e72499e00abb9942254171be?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FS-3.png"}, "displayName": "Smith", "active": "True", "timeZone": "Asia/Almaty", "groups": "None", "locale": "None", "accountType": "atlassian"}, "customfield_10043": "None", "customfield_10044": "None", "aggregateprogress": {"progress": 0, "total": 0}, "customfield_10001": "None", "customfield_10045": "None", "customfield_10046": "None", "customfield_10002": "None", "customfield_10003": "None", "customfield_10047": "None", "customfield_10004": "None", "customfield_10038": "None", "customfield_10039": "None", "environment": "None", "duedate": "2023-01-31", "progress": {"progress": 0, "total": 0}, "votes": {"self": "https://hackathon2023bcc.atlassian.net/rest/api/2/issue/HAC-13/votes", "votes": 0, "hasVoted": "False"}, "comment": {"maxResults": 0, "total": 0, "startAt": 0, "comments": [], "last": "False"}, "worklog": {"maxResults": 20, "total": 0, "startAt": 0, "worklogs": [], "last": "False"}}, "renderedFields": "None"}'''
+#CREATE
+# data = '''{"self": "https://hackathon2023bcc.atlassian.net/rest/api/2/10015", "id": 10015, "key": "HAC-14", "changelog": {"startAt": 0, "maxResults": 0, "total": 0, "histories": "None"}, "fields": {"statuscategorychangedate": "2023-01-29T13:53:20.381+0600", "issuetype": {"self": "https://hackathon2023bcc.atlassian.net/rest/api/2/issuetype/10005", "id": 10005, "description": "Stories track functionality or features expressed as user goals.", "iconUrl": "https://hackathon2023bcc.atlassian.net/rest/api/2/universal_avatar/view/type/issuetype/avatar/10315?size=medium", "name": "Story", "untranslatedName": "None", "subtask": "False", "fields": {}, "statuses": [], "namedValue": "Story"}, "timespent": "None", "customfield_10030": "None", "customfield_10031": "None", "project": {"self": "https://hackathon2023bcc.atlassian.net/rest/api/2/project/10002", "id": 10002, "key": "HAC", "name": "Hackathon", "description": "None", "avatarUrls": {"48x48": "https://hackathon2023bcc.atlassian.net/rest/api/2/universal_avatar/view/type/project/avatar/10413", "24x24": "https://hackathon2023bcc.atlassian.net/rest/api/2/universal_avatar/view/type/project/avatar/10413?size=small", "16x16": "https://hackathon2023bcc.atlassian.net/rest/api/2/universal_avatar/view/type/project/avatar/10413?size=xsmall", "32x32": "https://hackathon2023bcc.atlassian.net/rest/api/2/universal_avatar/view/type/project/avatar/10413?size=medium"}, "issuetypes": "None", "projectCategory": "None", "email": "None", "lead": "None", "components": "None", "versions": "None", "projectTypeKey": "software", "simplified": "True"}, "fixVersions": [], "aggregatetimespent": "None", "customfield_10035": "None", "resolution": "None", "customfield_10036": "None", "customfield_10037": "None", "customfield_10027": "None", "customfield_10028": "None", "customfield_10029": "None", "resolutiondate": "None", "workratio": -1, "issuerestriction": {"issuerestrictions": {}, "shouldDisplay": "True"}, "watches": {"self": "https://hackathon2023bcc.atlassian.net/rest/api/2/issue/HAC-14/watchers", "watchCount": 1, "isWatching": "False"}, "lastViewed": "None", "created": 1674978800046, "customfield_10020": "None", "customfield_10021": "None", "customfield_10022": "None", "customfield_10023": "None", "priority": {"self": "https://hackathon2023bcc.atlassian.net/rest/api/2/priority/3", "id": 3, "name": "Medium", "iconUrl": "https://hackathon2023bcc.atlassian.net/images/icons/priorities/medium.svg", "namedValue": "Medium"}, "customfield_10024": "None", "customfield_10025": "None", "customfield_10026": "None", "labels": [], "customfield_10016": "None", "customfield_10017": "None", "customfield_10018": {"hasEpicLinkFieldDependency": "False", "showField": "False", "nonEditableReason": {"reason": "PLUGIN_LICENSE_ERROR", "message": "Ссылка на родителя доступна только пользователям Jira Premium."}}, "customfield_10019": "0|i0003b:", "aggregatetimeoriginalestimate": "None", "timeestimate": "None", "versions": [], "issuelinks": [], "assignee": {"self": "https://hackathon2023bcc.atlassian.net/rest/api/2/user?accountId=63d21c5369c7ae3958d21c1a", "name": "None", "key": "None", "accountId": "63d21c5369c7ae3958d21c1a", "emailAddress": "None", "avatarUrls": {"48x48": "https://secure.gravatar.com/avatar/98e7652b2d663f1851ee2f8e575e5079?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FM-0.png", "24x24": "https://secure.gravatar.com/avatar/98e7652b2d663f1851ee2f8e575e5079?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FM-0.png", "16x16": "https://secure.gravatar.com/avatar/98e7652b2d663f1851ee2f8e575e5079?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FM-0.png", "32x32": "https://secure.gravatar.com/avatar/98e7652b2d663f1851ee2f8e575e5079?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FM-0.png"}, "displayName": "Mayra", "active": "True", "timeZone": "Asia/Almaty", "groups": "None", "locale": "None", "accountType": "atlassian"}, "updated": 1674978800046, "status": {"self": "https://hackathon2023bcc.atlassian.net/rest/api/2/status/10003", "description": "", "iconUrl": "https://hackathon2023bcc.atlassian.net/", "name": "To Do", "untranslatedName": "None", "id": 10003, "statusCategory": {"self": "https://hackathon2023bcc.atlassian.net/rest/api/2/statuscategory/2", "id": 2, "key": "new", "colorName": "blue-gray", "name": "New"}, "untranslatedNameValue": "None"}, "components": [], "timeoriginalestimate": "None", "description": "None", "customfield_10010": "None", "customfield_10014": "None", "customfield_10015": "None", "timetracking": {"originalEstimate": "None", "remainingEstimate": "None", "timeSpent": "None", "originalEstimateSeconds": 0, "remainingEstimateSeconds": 0, "timeSpentSeconds": 0}, "customfield_10005": "None", "customfield_10006": "None", "customfield_10007": "None", "security": "None", "customfield_10008": "None", "attachment": [], "customfield_10009": "None", "aggregatetimeestimate": "None", "summary": "New task123", "creator": {"self": "https://hackathon2023bcc.atlassian.net/rest/api/2/user?accountId=63d21dbc8c3018ca8a1c33d3", "name": "None", "key": "None", "accountId": "63d21dbc8c3018ca8a1c33d3", "emailAddress": "None", "avatarUrls": {"48x48": "https://secure.gravatar.com/avatar/3c717695e72499e00abb9942254171be?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FS-3.png", "24x24": "https://secure.gravatar.com/avatar/3c717695e72499e00abb9942254171be?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FS-3.png", "16x16": "https://secure.gravatar.com/avatar/3c717695e72499e00abb9942254171be?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FS-3.png", "32x32": "https://secure.gravatar.com/avatar/3c717695e72499e00abb9942254171be?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FS-3.png"}, "displayName": "Smith", "active": "True", "timeZone": "Asia/Almaty", "groups": "None", "locale": "None", "accountType": "atlassian"}, "subtasks": [], "customfield_10040": "None", "customfield_10041": "None", "customfield_10042": "None", "reporter": {"self": "https://hackathon2023bcc.atlassian.net/rest/api/2/user?accountId=63d21dbc8c3018ca8a1c33d3", "name": "None", "key": "None", "accountId": "63d21dbc8c3018ca8a1c33d3", "emailAddress": "None", "avatarUrls": {"48x48": "https://secure.gravatar.com/avatar/3c717695e72499e00abb9942254171be?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FS-3.png", "24x24": "https://secure.gravatar.com/avatar/3c717695e72499e00abb9942254171be?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FS-3.png", "16x16": "https://secure.gravatar.com/avatar/3c717695e72499e00abb9942254171be?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FS-3.png", "32x32": "https://secure.gravatar.com/avatar/3c717695e72499e00abb9942254171be?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FS-3.png"}, "displayName": "Smith", "active": "True", "timeZone": "Asia/Almaty", "groups": "None", "locale": "None", "accountType": "atlassian"}, "customfield_10043": "None", "customfield_10044": "None", "aggregateprogress": {"progress": 0, "total": 0}, "customfield_10001": "None", "customfield_10045": "None", "customfield_10046": "None", "customfield_10002": "None", "customfield_10003": "None", "customfield_10047": "None", "customfield_10048": "None", "customfield_10004": "None", "customfield_10038": "None", "customfield_10039": "None", "environment": "None", "duedate": "2023-02-03", "progress": {"progress": 0, "total": 0}, "votes": {"self": "https://hackathon2023bcc.atlassian.net/rest/api/2/issue/HAC-14/votes", "votes": 0, "hasVoted": "False"}, "comment": {"maxResults": 0, "total": 0, "startAt": 0, "comments": [], "last": "False"}, "worklog": {"maxResults": 20, "total": 0, "startAt": 0, "worklogs": [], "last": "False"}}, "renderedFields": "None"}'''
 # insertNewTask(data)
 
 
