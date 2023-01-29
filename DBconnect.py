@@ -133,6 +133,8 @@ def insertNewTask(data):
         result = addComment(f'Аналитик на текуищий момент занят. Готов взять в работу с {str(user_date)} по {str(end_date)}',task_name)
         print(result)
 
+    cursor.close()
+
         
 
         
@@ -217,7 +219,7 @@ def updateTaskDevelop(data):
 
                 print(f'Система предлагает создать сверх план для пользователя {task_user}')
                 result = addComment(f'Система предлагает создать сверх план для пользователя {task_user}',task_name)
-
+    cursor.close()
     return {'answer':'success'}
             
         

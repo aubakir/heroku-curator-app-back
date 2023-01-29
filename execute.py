@@ -138,7 +138,7 @@ def sumRating():
             # print('Рейтинг за этот квартал',(level/(len(allDate)))*(per/100))
     
             data.append(json)
-    
+    cursor.close()
     return data
 
 
