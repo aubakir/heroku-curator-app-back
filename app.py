@@ -21,7 +21,7 @@ def favicon():
 @app.route('/', methods=['GET'])
 def hello():
 	return {
-	    "Hackathon": "v0.1"
+	    "Hackathon": "v1.4.4"
 	}
 
 
