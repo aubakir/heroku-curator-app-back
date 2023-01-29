@@ -141,7 +141,7 @@ def insertNewTask(data):
 import json
 from datetime import datetime,date
 
-def updateTask(data):
+def updateTaskDevelop(data):
 
     data = json.loads(data)
     

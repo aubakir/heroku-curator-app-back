@@ -39,6 +39,7 @@ def createTask():
         
         print('-------------------------------CREATE TASK----------------------------------------')
         print(data)
+        DBconnect.insertNewTask(data)
         print('-------------------------------END CREATE TASK----------------------------------------')
 
         return jsonify({'answer':'success'})
@@ -61,6 +62,7 @@ def updateTask():
         
         print('-------------------------------UPDATE TASK----------------------------------------')
         print(data)
+        DBconnect.updateTaskDevelop(data)
         print('-------------------------------END UPDATE TASK----------------------------------------')
 
         return jsonify({'answer':'success'})
