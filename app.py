@@ -25,7 +25,7 @@ def hello():
 	}
 
 
-#Принмает данные о новым созданной задачи
+#Принмает данные о новым созданной задачи назначает время аналитики
 @app.route('/jira/create/task', methods=['POST'])
 def createTask():
 
@@ -44,6 +44,19 @@ def createTask():
         return jsonify({'answer':'success'})
 
     return jsonify({'answer':'failed'})
+
+
+
+#Принмает данные аналитика идет выборка разработчика
+@app.route('/jira/update/task', methods=['POST'])
+def updateTask():
+
+    print('-------------------------------UPDATE TASK----------------------------------------')
+    print(request.get_json())
+    print('-------------------------------END UPDATE TASK----------------------------------------')
+    
+    
+    return request.get_json()
 
 
 @app.route('/jira/update/sprint', methods=['POST'])
@@ -71,8 +84,6 @@ import execute
 def rating():
     return jsonify(execute.sumRating())
     
-
-
 if __name__ == "__main__":
     app.secret_key = 'ItIsASecret'
     app.debug = True

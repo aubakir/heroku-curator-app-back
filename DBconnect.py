@@ -1,5 +1,5 @@
 import psycopg2
-
+import jira
 
 #Jira credential
 jira_username = 'admiral.adam23@gmail.com'
@@ -35,6 +35,28 @@ def checkUser(user,pw):
     elif(answer):
         return '1'
 
+import requests
+
+#Отправка комментарий
+def addComment(text,project_name):
+    
+    json = {"update": {"comment": [{"add": {"body": f"{text}"}}]}}
+
+    try:
+        response = requests.put(f'{jira_url}/rest/api/2/issue/{project_name}',verify=True,json=json,auth=(jira_username, jira_password))
+        
+        if(response.status_code==204):
+            return {'answer':'success'}
+        else:
+            return {'answer':'error'}
+
+    except Exception as e:
+        print(str(e))
+        return {'answer':str(e)}
+        
+
+#addComment('1','BCC-1')
+
 
 import json
 from datetime import datetime
@@ -57,27 +79,72 @@ def insertNewTask(data):
     #2 - в ожида
     
     conn,cursor = connection()
-    cursor.execute(f"""insert into task_work (
-                        id_jira, 
-                        name, 
-                        user_name, 
-                        author, 
-                        level,  
-                        start_date,
-                        end_date, 
-                        status) values(
-                             {id_jira},
-                            '{task_name}',
-                            '{task_user}',
-                            '{task_author}',
-                             {task_level},
-                            '{start_date}',
-                            '{end_date}',
-                            1);""")
-    conn.commit()
+    # cursor.execute(f"""insert into task_work (
+    #                     id_jira, 
+    #                     name, 
+    #                     user_name, 
+    #                     author, 
+    #                     level,  
+    #                     start_date,
+    #                     end_date, 
+    #                     status) values(
+    #                          {id_jira},
+    #                         '{task_name}',
+    #                         '{task_user}',
+    #                         '{task_author}',
+    #                          {task_level},
+    #                         '{start_date}',
+    #                         '{end_date}',
+    #                         1);""")
+    # conn.commit()
 
+    #Вытаскиваем когда разработчик может освободиться
     cursor.execute(f"""SELECT END_DATE FROM task_work WHERE user_name='{task_user}' AND END_DATE in (SELECT MAX(END_DATE) FROM task_work  WHERE user_name='{task_user}' AND STATUS=2)""")
-    print(task_level)
+    data = cursor.fetchone()
+    
+    user_date = str(data[0]).split(' ')[0]
+    user_date = datetime.strptime(user_date, '%Y-%m-%d').date()
+    end_date = datetime.strptime(end_date, '%Y-%m-%d').date()
+
+    #Проверка пользователь занять или нет
+    if(user_date<end_date):
+        #Отправка комментарий
+        result = addComment(f'Пользователь свободен и может взять задачу: {str(user_date)}',task_name)
+        print(result)
+    else:
+        #Отправка комментарий
+        result = addComment(f'Пользователь освободиться: {str(user_date)}',task_name)
+        print(result)
+
+        #Поиск других разработчиков
+        cursor.execute(f"""SELECT u.fio, tw.end_date FROM task_work tw , users u WHERE u.username=tw.user_name and tw.user_name!='{task_user}' AND tw.END_DATE in (SELECT MIN(tw1.END_DATE) FROM task_work tw1  WHERE tw1.user_name!='{task_user}' AND tw1.STATUS=2)""")
+        data = cursor.fetchone()
+
+        if(data):
+            dop_user_fio = data[0]
+            dop_user_end_date = data[1]
+
+            dop_user_end_date = str(dop_user_end_date).split(' ')[0]
+            dop_user_end_date = datetime.strptime(dop_user_end_date, '%Y-%m-%d').date()
+
+            print(str(user_date))
+            print(str(dop_user_end_date))
+            if(user_date>dop_user_end_date):
+                print(f'Альтарнатива: {dop_user_fio}, освободиться {str(dop_user_end_date)}')
+            else:
+                print('Сверх работу создайте')
+            
+            
+            
+        
+
+        
+        
+        
+        
+   
+    
+
 
 
 
@@ -87,16 +154,16 @@ def insertNewTask(data):
 
 
 
-# '''
-# CREATE TABLE task_waiting (
-# 	id serial PRIMARY KEY,
-#     id_jira integer,
-#     name VARCHAR (100),
-#     user_name VARCHAR (100),
-# 	author VARCHAR (100),        
-#     level integer,
-#     end_date TIMESTAMP,
-# 	status integer 
-# );
-# '''
+'''
+CREATE TABLE task_waiting (
+	id serial PRIMARY KEY,
+    id_jira integer,
+    name VARCHAR (100),
+    user_name VARCHAR (100),
+	author VARCHAR (100),        
+    level integer,
+    end_date TIMESTAMP,
+	status integer 
+);
+'''
 
